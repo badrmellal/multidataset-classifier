@@ -36,6 +36,9 @@ This project is an end-to-end deep learning system for training and deploying tr
    ```bash
    python run_training.py --config news_classification
    ```
+      ```bash
+   python run_training.py --config sentiment_classification
+   ```
 
 2. Using a custom configuration file:
    ```bash
