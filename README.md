@@ -1,5 +1,7 @@
 # BERT Multi-Dataset Text Classifier
 
+Deployed here: https://classifyme.streamlit.app/
+
 ## Overview
 This project is an end-to-end deep learning system for training and deploying transformer-based text classification models across multiple datasets. The architecture supports batch training on various text classification tasks while sharing knowledge across datasets.
 
