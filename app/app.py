@@ -9,6 +9,7 @@ os.environ["STREAMLIT_SERVER_WATCH_PATTERNS"] = ""
 # Tell PyTorch to ignore MPS
 os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 
+os.environ["TOKENIZERS_PARALLELISM"] = "false"
 
 import streamlit as st
 import json
@@ -107,7 +108,7 @@ def load_resources(model_dir: str):
 
 
 # App title and description
-st.title("🤖 Multi-Dataset Text Classifier")
+st.title("Multi-Dataset Text Classifier")
 st.markdown(
     """
     This application classifies text using a transformer-based model trained on multiple datasets.

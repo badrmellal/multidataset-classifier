@@ -83,10 +83,28 @@ def _get_best_device():
     else:
         return "cpu"
 
+
 def get_best_device():
-    """Get the best available device, forcing CPU on Streamlit"""
-    # Always use CPU for safety in Streamlit environment
-    return "cpu"
+    """Get the best available device, ensuring cross-environment compatibility"""
+    # Check for certain environment variables that suggest we're in a server
+    is_server = (
+            os.getenv('STREAMLIT_SERVER_SENT_EVENTS') is not None or
+            os.getenv('STREAMLIT_SERVER') is not None or
+            os.getenv('CONTAINER_ID') is not None or
+            os.getenv('STREAMLIT_BROWSER_GATHER_USAGE_STATS') is not None
+    )
+
+    # Force CPU for compatibility on server environments
+    if is_server:
+        return "cpu"
+
+    # For local environments, use available hardware
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+        return "mps"  # Mac Silicon
+    elif torch.cuda.is_available():
+        return "cuda"  # NVIDIA GPU
+    else:
+        return "cpu"  # Default fallback
 
 
 def load_model(

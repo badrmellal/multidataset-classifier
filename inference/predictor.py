@@ -24,23 +24,29 @@ class Predictor:
         self.tokenizer = tokenizer
         self.dataset_label_maps = dataset_label_maps or {}
 
-        def _get_best_device():
-            # On Streamlit's servers, we never use MPS
-            if os.getenv('STREAMLIT_SERVER_SENT_EVENTS'):  # Check if on Streamlit
-                if torch.cuda.is_available():
-                    return "cuda"
-                else:
-                    return "cpu"
+        def get_best_device():
+            """Get the best available device, ensuring cross-environment compatibility"""
+            # Check for certain environment variables that suggest we're in a server
+            is_server = (
+                    os.getenv('STREAMLIT_SERVER_SENT_EVENTS') is not None or
+                    os.getenv('STREAMLIT_SERVER') is not None or
+                    os.getenv('CONTAINER_ID') is not None or
+                    os.getenv('STREAMLIT_BROWSER_GATHER_USAGE_STATS') is not None
+            )
 
-            # For local development, we can use MPS if available
-            if torch.backends.mps.is_available():
-                return "mps"
-            elif torch.cuda.is_available():
-                return "cuda"
-            else:
+            # Force CPU for compatibility on server environments
+            if is_server:
                 return "cpu"
 
-        self.device = device or _get_best_device()
+            # For local environments, use available hardware
+            if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
+                return "mps"  # Mac Silicon
+            elif torch.cuda.is_available():
+                return "cuda"  # NVIDIA GPU
+            else:
+                return "cpu"  # Default fallback
+
+        self.device = device or get_best_device()
 
         # Move model to device
         self.model = self.model.to(self.device)
