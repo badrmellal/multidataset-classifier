@@ -135,8 +135,9 @@ class MultiHeadClassifier(nn.Module):
             hidden_dim=hidden_dim
         )
 
-        # Load classification heads
-        heads_dict = torch.load(f"{load_directory}/classification_heads.pt")
+        # CHANGE THIS LINE: Always force CPU when loading
+        heads_dict = torch.load(f"{load_directory}/classification_heads.pt", map_location="cpu")
+
         for dataset_id, state_dict in heads_dict.items():
             model.dataset_heads[dataset_id].load_state_dict(state_dict)
 
