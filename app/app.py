@@ -1,5 +1,76 @@
-import streamlit as st
+# Place this at the very top of app.py, before ANY other imports
 import os
+import sys
+
+# Disable Streamlit's file watcher
+os.environ["STREAMLIT_SERVER_WATCH_PATTERNS"] = ""
+
+# Create a directory for the config file if it doesn't exist
+os.makedirs(".streamlit", exist_ok=True)
+
+# Write the config file to disable file watching
+with open(".streamlit/config.toml", "w") as f:
+    f.write("""
+[server]
+enableStaticServing = true
+
+[runner]
+# Disable the file watcher to prevent the PyTorch errors
+watchPatterns = [""]
+""")
+
+
+# Apply MPS device patches before importing torch
+def patch_torch():
+    # This will patch torch when it's imported
+    import builtins
+    original_import = builtins.__import__
+
+    def patched_import(name, *args, **kwargs):
+        module = original_import(name, *args, **kwargs)
+        if name == 'torch':
+            # Completely disable MPS
+            if hasattr(module.backends, 'mps'):
+                module.backends.mps.is_available = lambda: False
+
+            # Override torch.load to always use CPU
+            original_load = module.load
+
+            def patched_load(f, map_location=None, *args, **kwargs):
+                if map_location is None:
+                    map_location = 'cpu'
+                return original_load(f, map_location=map_location, *args, **kwargs)
+
+            module.load = patched_load
+
+            # Patch torch serialization module directly
+            if hasattr(module, 'serialization'):
+                original_restore = module.serialization.default_restore_location
+
+                def new_restore(storage, location):
+                    if 'mps' in location.lower():
+                        location = 'cpu'
+                    return original_restore(storage, location)
+
+                module.serialization.default_restore_location = new_restore
+
+                # Also try to remove MPS deserializer if it exists
+                if hasattr(module.serialization, '_mps_deserialize'):
+                    def null_deserialize(*args, **kwargs):
+                        raise RuntimeError("MPS device intentionally disabled")
+
+                    module.serialization._mps_deserialize = null_deserialize
+
+        return module
+
+    builtins.__import__ = patched_import
+
+
+# Apply the patch
+patch_torch()
+
+
+import streamlit as st
 import json
 import pandas as pd
 import matplotlib.pyplot as plt
