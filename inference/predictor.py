@@ -1,3 +1,5 @@
+import os
+
 import torch
 import numpy as np
 from typing import Dict, List, Optional, Union, Tuple
@@ -23,6 +25,14 @@ class Predictor:
         self.dataset_label_maps = dataset_label_maps or {}
 
         def _get_best_device():
+            # On Streamlit's servers, we never use MPS
+            if os.getenv('STREAMLIT_SERVER_SENT_EVENTS'):  # Check if on Streamlit
+                if torch.cuda.is_available():
+                    return "cuda"
+                else:
+                    return "cpu"
+
+            # For local development, we can use MPS if available
             if torch.backends.mps.is_available():
                 return "mps"
             elif torch.cuda.is_available():
