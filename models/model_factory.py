@@ -62,7 +62,7 @@ def save_model(
         config.save(os.path.join(save_directory, "config.yaml"))
 
 
-def get_best_device():
+def _get_best_device():
     """
     Get the best available device, avoiding MPS on Streamlit servers
     """
@@ -82,6 +82,11 @@ def get_best_device():
         return "cuda"
     else:
         return "cpu"
+
+def get_best_device():
+    """Get the best available device, forcing CPU on Streamlit"""
+    # Always use CPU for safety in Streamlit environment
+    return "cpu"
 
 
 def load_model(
