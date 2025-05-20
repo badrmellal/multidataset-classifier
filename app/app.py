@@ -3,8 +3,6 @@ import os
 import sys
 
 
-# Tell PyTorch to ignore MPS
-os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 # Disable Streamlit's file watcher
 os.environ["STREAMLIT_SERVER_WATCH_PATTERNS"] = ""
 
