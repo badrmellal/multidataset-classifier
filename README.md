@@ -5,10 +5,16 @@ Deployed here: https://classifyme.streamlit.app/
 ## Overview
 This project is an end-to-end deep learning system for training and deploying transformer-based text classification models across multiple datasets. The architecture supports batch training on various text classification tasks while sharing knowledge across datasets.
 
+## ScreenShots
 
 <img width="1512" alt="Screenshot 2025-05-19 at 5 25 15 PM" src="https://github.com/user-attachments/assets/35004e92-fa10-46a6-84d4-313aac25f369" />
 <img width="1512" alt="Screenshot 2025-05-19 at 5 25 29 PM" src="https://github.com/user-attachments/assets/7a8c3f9b-a03d-4d57-a21c-5d3daf2fa3f3" />
 <img width="1512" alt="Screenshot 2025-05-19 at 5 25 02 PM" src="https://github.com/user-attachments/assets/383083cd-ea34-40b1-9f98-3e04d8d617b0" />
+
+## Video Demo
+
+https://github.com/user-attachments/assets/e86b3c87-c65a-4318-a7dc-f0891a120d52
+
 
 ## Features
 
