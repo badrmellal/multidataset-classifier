@@ -135,8 +135,27 @@ class MultiHeadClassifier(nn.Module):
             hidden_dim=hidden_dim
         )
 
-        # CHANGE THIS LINE: Always force CPU when loading
-        heads_dict = torch.load(f"{load_directory}/classification_heads.pt", map_location="cpu")
+        try:
+            # Try loading with explicit CPU mapping
+            heads_dict = torch.load(
+                f"{load_directory}/classification_heads.pt",
+                map_location="cpu"
+            )
+        except RuntimeError as e:
+            if "mps" in str(e).lower():
+                # If that fails with MPS error, try a different approach with a temporary function
+                def cpu_map_fn(storage, loc):
+                    if loc.startswith('mps'):
+                        return storage.cpu()
+                    return storage
+
+                heads_dict = torch.load(
+                    f"{load_directory}/classification_heads.pt",
+                    map_location=cpu_map_fn
+                )
+            else:
+                # If it's a different error, re-raise it
+                raise
 
         for dataset_id, state_dict in heads_dict.items():
             model.dataset_heads[dataset_id].load_state_dict(state_dict)

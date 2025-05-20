@@ -1,7 +1,10 @@
-# Place this at the very top of app.py, before ANY other imports
+
 import os
 import sys
 
+
+# Tell PyTorch to ignore MPS
+os.environ["PYTORCH_ENABLE_MPS_FALLBACK"] = "1"
 # Disable Streamlit's file watcher
 os.environ["STREAMLIT_SERVER_WATCH_PATTERNS"] = ""
 
@@ -76,7 +79,7 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import seaborn as sns
 from typing import Dict, List, Optional
-import sys
+
 
 # Parent directory to path so we can import from configs, models, etc.
 current_dir = os.path.dirname(os.path.abspath(__file__))

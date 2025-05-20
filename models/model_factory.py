@@ -62,28 +62,32 @@ def save_model(
         config.save(os.path.join(save_directory, "config.yaml"))
 
 
-def _get_best_device():
-    # On Streamlit's servers, we never use MPS
-    if os.getenv('STREAMLIT_SERVER_SENT_EVENTS'):  # Check if on Streamlit
+def get_best_device():
+    """
+    Get the best available device, avoiding MPS on Streamlit servers
+    """
+    # In Streamlit or container environment, never use MPS
+    if (os.getenv('STREAMLIT_SERVER_SENT_EVENTS') is not None or
+            os.getenv('STREAMLIT_BROWSER_GATHER_USAGE_STATS') is not None or
+            os.getenv('CONTAINER_ID') is not None):
         if torch.cuda.is_available():
             return "cuda"
         else:
             return "cpu"
 
     # For local development, we can use MPS if available
-    if torch.backends.mps.is_available():
+    if hasattr(torch.backends, "mps") and torch.backends.mps.is_available():
         return "mps"
     elif torch.cuda.is_available():
         return "cuda"
     else:
         return "cpu"
 
+
 def load_model(
-    load_directory: str,
-    device: str = None
+        load_directory: str,
+        device: str = None
 ) -> tuple:
-    if device is None:
-        device = _get_best_device()
     """
     Load model, tokenizer and config from directory
 
@@ -94,6 +98,9 @@ def load_model(
     Returns:
         Tuple of (model, tokenizer, config)
     """
+    if device is None:
+        device = get_best_device()
+
     # Check if directory exists
     if not os.path.exists(load_directory):
         raise ValueError(f"Directory {load_directory} does not exist")
